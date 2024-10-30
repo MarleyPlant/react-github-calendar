@@ -8,6 +8,18 @@ import Calendar, {
 } from 'react-activity-calendar';
 import { transformData } from './lib';
 import { Activity, ApiErrorResponse, ApiResponse, Year } from './types';
+import { fetchGitlabData } from './gitlab';
+import { fetchGitHubData } from './github';
+
+async function fetchCalendarData(username: string, year: Year): Promise<ApiResponse> {
+  let Gitlab = await fetchGitlabData(username, year);
+  let GitHub = await fetchGitHubData(username, year);
+
+  GitHub.total[year] += Gitlab.total[year];
+
+  let data = { 'contributions': GitHub.contributions.concat(Gitlab.contributions), 'total': GitHub.total };
+  return data;
+}
 
 export interface Props extends Omit<ActivityCalendarProps, 'data'> {
   username: string;
@@ -16,20 +28,6 @@ export interface Props extends Omit<ActivityCalendarProps, 'data'> {
   transformData?: (data: Array<Activity>) => Array<Activity>;
   transformTotalCount?: boolean;
   year?: Year;
-}
-
-async function fetchCalendarData(username: string, year: Year): Promise<ApiResponse> {
-  const apiUrl = 'https://github-contributions-api.jogruber.de/v4/';
-  const response = await fetch(`${apiUrl}${username}?y=${year}`);
-  const data = (await response.json()) as ApiResponse | ApiErrorResponse;
-
-  if (!response.ok) {
-    throw Error(
-      `Fetching GitHub contribution data for "${username}" failed: ${(data as ApiErrorResponse).error}`,
-    );
-  }
-
-  return data as ApiResponse;
 }
 
 const GitHubCalendar = forwardRef<HTMLElement, Props>(

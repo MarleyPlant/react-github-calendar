@@ -17,3 +17,22 @@ export interface ApiResponse {
 export interface ApiErrorResponse {
   error: string;
 }
+
+export interface GitlabResponseEventPushData {
+  commit_count: number;
+}
+export interface GitLabResponseEvent {
+  id: number;
+  project_id: number;
+  action_name: string;
+  target_id: number;
+  target_iid: number;
+  target_type: string;
+  target_title: string;
+  author_id: number;
+
+  created_at: string;
+  imported: boolean;
+  author_username: string;
+  push_data?: GitlabResponseEventPushData;
+}
